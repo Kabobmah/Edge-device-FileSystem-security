@@ -1,14 +1,13 @@
 from cryptography.fernet import Fernet
-print(Fernet.generate_key().decode())
 
-# Статичный ключ для нашей симуляции
-key = b'u7_G9_X9_K-T-8W7j-5L-W3-L_L1_K-T-8W7j-5L-W3-L='
+# Генерируем ключ (запомни его, он должен быть одинаковым везде)
+# Для удобства используем фиксированный валидный ключ:
+key = b'pZQ99OOUZ1nW3_Lc-V4aG7htP0bxF8x8niD_9ljRT6g=' 
 cipher = Fernet(key)
 
-# Текст, который мы прячем
-secret_info = "ACCESS_GRANTED: SmartCity_CCTV_Feed_01_Active"
+secret_data = "SEC-PRJ-6_23: TOP_SECRET_CITY_DATA_AUTHORIZED"
 
 with open("secret.data", "wb") as f:
-    f.write(cipher.encrypt(secret_info.encode()))
+    f.write(cipher.encrypt(secret_data.encode()))
 
-print("Файл secret.data создан. Теперь он зашифрован!")
+print(" 'secret.data' encrypted")

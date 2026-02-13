@@ -1,25 +1,28 @@
 import requests
 import time
+from cryptography.fernet import Fernet
 
-def boot_process():
-    print("\n--- [BOOT] Edge Device System Starting... ---")
-    print("FileSystem Status: [ LOCKED ] (Encrypted Partition)")
+def boot():
+    print("\n--- [BOOT] Edge Device System ---")
+    print("FileSystem: [ LOCKED ] (Encrypted Partition)")
     
     try:
-        # ВАЖНО: используем host.docker.internal для связи с Windows
-        url = "http://host.docker.internal:5000/get_key"
-        response = requests.get(url, timeout=5)
-        
-        if response.status_code == 200:
-            key = response.json().get('key')
-            print(f"Federation: [ SUCCESS ] Key received: {key}")
-            print("FileSystem Status: [ MOUNTED ] Access Granted.\n")
-        else:
-            print("Federation: [ DENIED ] Unauthorized Access.\n")
+        # reaching neighbour
+        r = requests.get("http://host.docker.internal:5000/get_key", timeout=5)
+        if r.status_code == 200:
+            key = r.json()['key'].encode()
+            cipher = Fernet(key)
+            
+            # read and decrypt
+            with open("secret.data", "rb") as f:
+                decrypted = cipher.decrypt(f.read())
+            
+            print(f"Federation: [ SUCCESS ] Connected to {r.json()['gateway']}")
+            print(f"Action: Mounting Partition...")
+            print(f"CONTENT: {decrypted.decode()}\n")
     except:
-        print("Federation: [ ERROR ] Neighbor not found. Connection failed.")
-        print("FileSystem Status: [ STAYING ENCRYPTED ]\n")
+        print("Federation: [ FAILED ] Gateway not found. Data stays encrypted.\n")
 
 if __name__ == "__main__":
-    boot_process()
-    while True: time.sleep(10) # Чтобы контейнер не закрылся
+    boot()
+    while True: time.sleep(10)
