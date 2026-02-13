@@ -1,5 +1,5 @@
 FROM python:3.9-slim
 WORKDIR /app
-RUN python -m pip install requests flask
+RUN pip install requests flask cryptography
 COPY . .
 CMD ["python", "edge_device.py"]
