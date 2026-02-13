@@ -6,23 +6,37 @@ def boot():
     print("\n--- [BOOT] Edge Device System ---")
     print("FileSystem: [ LOCKED ] (Encrypted Partition)")
     
+    # ВАЖНО: используем host.docker.internal для связи с Windows
+    url = "http://host.docker.internal:5000/get_key"
+    
     try:
-        # reaching neighbour
-        r = requests.get("http://host.docker.internal:5000/get_key", timeout=5)
-        if r.status_code == 200:
-            key = r.json()['key'].encode()
-            cipher = Fernet(key)
+        print(f"Federation: Requesting key from {url}...")
+        response = requests.get(url, timeout=5)
+        
+        if response.status_code == 200:
+            # Получаем ключ из JSON ответа сервера
+            key_received = response.json()['key'].encode()
+            cipher = Fernet(key_received)
             
-            # read and decrypt
+            # Читаем зашифрованный файл secret.data
             with open("secret.data", "rb") as f:
-                decrypted = cipher.decrypt(f.read())
+                encrypted_content = f.read()
             
-            print(f"Federation: [ SUCCESS ] Connected to {r.json()['gateway']}")
+            # Расшифровываем данные
+            decrypted = cipher.decrypt(encrypted_content)
+            
+            print(f"Federation: [ SUCCESS ] Key received from Gateway")
             print(f"Action: Mounting Partition...")
             print(f"CONTENT: {decrypted.decode()}\n")
-    except:
-        print("Federation: [ FAILED ] Gateway not found. Data stays encrypted.\n")
+        else:
+            print(f"Federation: [ FAILED ] Server returned status {response.status_code}")
+
+    except Exception as e:
+        print(f"Federation: [ FAILED ] Connection error: {e}")
+        print("Action: Data stays encrypted.\n")
 
 if __name__ == "__main__":
     boot()
-    while True: time.sleep(10)
+    # Оставляем контейнер активным для демонстрации
+    while True: 
+        time.sleep(10)

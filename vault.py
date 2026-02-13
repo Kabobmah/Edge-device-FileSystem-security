@@ -1,13 +1,21 @@
 from cryptography.fernet import Fernet
+import os
 
-# Генерируем ключ (запомни его, он должен быть одинаковым везде)
-# Для удобства используем фиксированный валидный ключ:
-key = b'pZQ99OOUZ1nW3_Lc-V4aG7htP0bxF8x8niD_9ljRT6g=' 
+key = b'pZQ9900UZ1nW3_Lc-V4aG7htp0bxf8x8niD_9ljRT6g=' 
 cipher = Fernet(key)
 
-secret_data = "SEC-PRJ-6_23: TOP_SECRET_CITY_DATA_AUTHORIZED"
+def encrypt():
+    if not os.path.exists("message.txt"):
+        with open("message.txt", "w") as f:
+            f.write("DEFAULT_SECRET_DATA_001")
+    
+    with open("message.txt", "r") as f:
+        text = f.read()
 
-with open("secret.data", "wb") as f:
-    f.write(cipher.encrypt(secret_data.encode()))
+    with open("secret.data", "wb") as f:
+        f.write(cipher.encrypt(text.encode()))
 
-print(" 'secret.data' encrypted")
+    print(f"Done! 'secret.data' created with message: {text}")
+
+if __name__ == "__main__":
+    encrypt()
