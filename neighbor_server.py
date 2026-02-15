@@ -5,7 +5,7 @@ app = Flask(__name__)
 # Тот же ключ, что используется для шифрования в vault.py
 FERNET_KEY = "pZQ9900UZ1nW3_Lc-V4aG7htp0bxf8x8niD_9ljRT6g="
 
-@app.route('/get_key')
+@app.route('/get_key') #in realit
 def give_key():
     print("--- [GATEWAY] Request received! Sending key... ---")
     return jsonify({
